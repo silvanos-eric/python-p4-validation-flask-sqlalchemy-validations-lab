@@ -22,6 +22,18 @@ class Author(db.Model):
             raise ValueError(f'Duplicate {key}.')
         return name
 
+    @validates('phone_number')
+    def validate_phone_number(self, _, phone_number):
+        """Validates the `phone_number` attribute of an `Author`."""
+        if not phone_number.isdigit():
+            raise ValueError('Phone number must contain only numbers.')
+        if len(phone_number) != 10:
+            raise ValueError('Phone number must be exactly 10 digits.')
+        return phone_number
+
+    def __repr__(self):
+        return f'Author(id={self.id}, name={self.name})'
+
 
 class Post(db.Model):
     __tablename__ = 'posts'

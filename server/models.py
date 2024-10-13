@@ -44,6 +44,15 @@ class Post(db.Model):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
+    @validates('title')
+    def validate_title(self, key, title):
+        clickbait_words = ["Won't Believe", "Secret", "Top", "Guess"]
+        if not any(word.lower() in title.lower() for word in clickbait_words):
+            raise ValueError(
+                f'{key.capitalize()} must include one of the following values: {clickbait_words}.'
+            )
+        return title
+
     @validates('content')
     def validate_content(self, key, content):
         if len(content) < 250:

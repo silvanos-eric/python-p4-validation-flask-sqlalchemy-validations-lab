@@ -15,7 +15,6 @@ class Author(db.Model):
 
     @validates('name')
     def validate_name(self, key, name):
-        """Validates the `name` attribute of an `Author`."""
         if not name:
             raise ValueError(f'{key.capitalize()} cannot be empty.')
         if self.__class__.query.filter_by(name=name).first():
@@ -24,7 +23,6 @@ class Author(db.Model):
 
     @validates('phone_number')
     def validate_phone_number(self, _, phone_number):
-        """Validates the `phone_number` attribute of an `Author`."""
         if not phone_number.isdigit():
             raise ValueError('Phone number must contain only numbers.')
         if len(phone_number) != 10:
@@ -46,7 +44,12 @@ class Post(db.Model):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
-    # Add validators
+    @validates('content')
+    def validate_content(self, key, content):
+        if len(content) < 250:
+            raise ValueError(
+                f'{key.capitalize()} must be at least 250 characters long.')
+        return content
 
     def __repr__(self):
         return f'Post(id={self.id}, title={self.title} content={self.content}, summary={self.summary})'

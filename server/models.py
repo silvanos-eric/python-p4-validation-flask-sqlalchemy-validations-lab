@@ -14,11 +14,11 @@ class Author(db.Model):
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
     @validates('name')
-    def validate_name(self, key, name):
+    def validate_name(self, _, name):
         if not name:
-            raise ValueError(f'{key.capitalize()} cannot be empty.')
+            raise ValueError('Name cannot be empty.')
         if self.__class__.query.filter_by(name=name).first():
-            raise ValueError(f'Duplicate {key}.')
+            raise ValueError('Duplicate name.')
         return name
 
     @validates('phone_number')
@@ -45,20 +45,26 @@ class Post(db.Model):
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
     @validates('title')
-    def validate_title(self, key, title):
+    def validate_title(self, _, title):
         clickbait_words = ["Won't Believe", "Secret", "Top", "Guess"]
         if not any(word.lower() in title.lower() for word in clickbait_words):
             raise ValueError(
-                f'{key.capitalize()} must include one of the following values: {clickbait_words}.'
+                f'Title must include one of the following values: {clickbait_words}'
             )
         return title
 
     @validates('content')
-    def validate_content(self, key, content):
+    def validate_content_length(self, _, content):
+        """Validate `content` length."""
         if len(content) < 250:
-            raise ValueError(
-                f'{key.capitalize()} must be at least 250 characters long.')
+            raise ValueError('Content must be at least 250 characters long.')
         return content
+
+    @validates('summary')
+    def validate_summary_length(self, _, summary):
+        if len(summary) > 250:
+            raise ValueError('Summary must be 250 characters or less.')
+        return summary
 
     def __repr__(self):
         return f'Post(id={self.id}, title={self.title} content={self.content}, summary={self.summary})'
